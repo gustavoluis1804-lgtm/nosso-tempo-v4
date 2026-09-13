@@ -1,0 +1,59 @@
+name: Gerar APK - Nosso Tempo
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Criar Android
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+
+          npx cap sync android
+
+      - name: Aplicar configurações do Android
+        run: node scripts/patch-android.mjs
+
+      - name: Dar permissão ao Gradle
+        run: chmod +x android/gradlew
+
+      - name: Limpar build anterior
+        working-directory: android
+        run: ./gradlew clean
+
+      - name: Gerar APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Salvar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nosso-Tempo-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
