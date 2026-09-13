@@ -5,13 +5,22 @@ const root = process.cwd();
 const androidRoot = path.join(root, "android");
 
 if (!fs.existsSync(androidRoot)) {
-  console.error("Pasta android não encontrada. Execute: npx cap add android");
+  console.error("❌ Pasta android não encontrada.");
+  console.error("Execute primeiro: npx cap add android");
   process.exit(1);
 }
 
 const appId = "com.gustavo.nossotempo";
 const packagePath = appId.split(".").join(path.sep);
-const javaDir = path.join(androidRoot, "app", "src", "main", "java", packagePath);
+
+const javaDir = path.join(
+  androidRoot,
+  "app",
+  "src",
+  "main",
+  "java",
+  packagePath
+);
 
 fs.mkdirSync(javaDir, { recursive: true });
 
@@ -21,6 +30,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -50,66 +60,128 @@ public class MainActivity extends BridgeActivity {
             );
         }
 
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        );
+
         enterImmersiveMode();
     }
 
     @Override
-public void onWindowFocusChanged(boolean hasFocus) {
-    super.onWindowFocusChanged(hasFocus);
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
 
-    if (hasFocus) {
+        if (hasFocus) {
+            enterImmersiveMode();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         enterImmersiveMode();
     }
 }
-
-@Override
-public void onResume() {
-    super.onResume();
-    enterImmersiveMode();
-}
 `;
 
-fs.writeFileSync(path.join(javaDir, "MainActivity.java"), mainActivity, "utf8");
+const mainActivityPath = path.join(
+  javaDir,
+  "MainActivity.java"
+);
 
-const manifestPath = path.join(androidRoot, "app", "src", "main", "AndroidManifest.xml");
-let manifest = fs.readFileSync(manifestPath, "utf8");
+fs.writeFileSync(
+  mainActivityPath,
+  mainActivity,
+  "utf8"
+);
 
-manifest = manifest
-  .replace(/android:label="[^"]*"/, 'android:label="Nosso Tempo"')
-  .replace(
-    /(<activity\b[^>]*android:name="\.MainActivity"[^>]*)(>)/s,
-    (full, start, end) => {
-      let updated = start;
-      const attrs = [
-        ["android:showWhenLocked", "true"],
-        ["android:turnScreenOn", "true"],
-        ["android:screenOrientation", "portrait"]
-      ];
+console.log("✅ MainActivity.java criado corretamente.");
 
-      for (const [key, value] of attrs) {
-        const rx = new RegExp(`${key}="[^"]*"`);
-        if (rx.test(updated)) {
-          updated = updated.replace(rx, `${key}="${value}"`);
-        } else {
-          updated += `\n            ${key}="${value}"`;
-        }
+
+/* =========================
+   ANDROID MANIFEST
+========================= */
+
+const manifestPath = path.join(
+  androidRoot,
+  "app",
+  "src",
+  "main",
+  "AndroidManifest.xml"
+);
+
+if (!fs.existsSync(manifestPath)) {
+  console.error("❌ AndroidManifest.xml não encontrado.");
+  process.exit(1);
+}
+
+let manifest = fs.readFileSync(
+  manifestPath,
+  "utf8"
+);
+
+
+/* Nome do aplicativo */
+
+manifest = manifest.replace(
+  /android:label="[^"]*"/,
+  'android:label="Nosso Tempo"'
+);
+
+
+/* Configurações da MainActivity */
+
+const activityRegex =
+  /(<activity\\b[^>]*android:name="\\.MainActivity"[^>]*)(>)/s;
+
+if (!activityRegex.test(manifest)) {
+  console.error("❌ MainActivity não encontrada no AndroidManifest.xml");
+  process.exit(1);
+}
+
+manifest = manifest.replace(
+  activityRegex,
+  (full, start, end) => {
+
+    let updated = start;
+
+    const attributes = [
+      ["android:showWhenLocked", "true"],
+      ["android:turnScreenOn", "true"],
+      ["android:screenOrientation", "portrait"]
+    ];
+
+    for (const [key, value] of attributes) {
+
+      const regex = new RegExp(
+        `${key}="[^"]*"`
+      );
+
+      if (regex.test(updated)) {
+
+        updated = updated.replace(
+          regex,
+          `${key}="${value}"`
+        );
+
+      } else {
+
+        updated +=
+          `\\n            ${key}="${value}"`;
+
       }
-
-      return updated + end;
     }
-  );
 
-fs.writeFileSync(manifestPath, manifest, "utf8");
+    return updated + end;
+  }
+);
 
-/*
-  IMPORTANTE:
-  Não criamos nem alteramos:
-  - res/values/colors.xml
-  - res/values/ic_launcher_background.xml
 
-  Isso evita o erro:
-  "Duplicate resources: color/ic_launcher_background"
-*/
+fs.writeFileSync(
+  manifestPath,
+  manifest,
+  "utf8"
+);
 
-console.log("Android corrigido e configurado para Nosso Tempo.");
+console.log("✅ AndroidManifest.xml configurado.");
+console.log("✅ Nosso Tempo pronto para compilar.");
