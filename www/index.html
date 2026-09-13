@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#090A0D" />
+  <title>Nosso Tempo</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="lockscreen" aria-label="Nosso Tempo">
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <div class="grain"></div>
+
+    <section class="content">
+      <header class="time-area">
+        <p class="date" id="dateLabel">sábado, 12 de setembro</p>
+        <div class="clock" id="clock">00:00</div>
+      </header>
+
+      <section class="counter-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">NOSSO TEMPO</p>
+            <h1>Juntos há <span class="heart">♡</span></h1>
+          </div>
+          <span class="live-dot"></span>
+        </div>
+
+        <div class="counter-grid">
+          <div class="unit"><strong id="days">00</strong><span>DIAS</span></div>
+          <div class="divider"></div>
+          <div class="unit"><strong id="hours">00</strong><span>HORAS</span></div>
+          <div class="divider"></div>
+          <div class="unit"><strong id="minutes">00</strong><span>MIN</span></div>
+          <div class="divider"></div>
+          <div class="unit"><strong id="seconds">00</strong><span>SEG</span></div>
+        </div>
+
+        <p class="since" id="sinceLabel">Desde 12 de setembro de 2026 • 16:43</p>
+      </section>
+
+      <p class="hint">Toque duas vezes em “Nosso Tempo” para ajustar a data</p>
+    </section>
+
+    <dialog class="settings-sheet" id="settingsDialog">
+      <form method="dialog" class="settings-content" id="settingsForm">
+        <div class="sheet-handle"></div>
+
+        <div class="sheet-title-row">
+          <div>
+            <p class="eyebrow">CONFIGURAÇÃO</p>
+            <h2>Nosso Tempo</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Fechar">×</button>
+        </div>
+
+        <label>
+          <span>Data de início</span>
+          <input id="startDateInput" type="date" required />
+        </label>
+
+        <label>
+          <span>Horário</span>
+          <input id="startTimeInput" type="time" step="60" required />
+        </label>
+
+        <div class="actions">
+          <button type="button" class="secondary" id="resetButton">Restaurar</button>
+          <button type="submit" class="primary">Salvar</button>
+        </div>
+      </form>
+    </dialog>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
